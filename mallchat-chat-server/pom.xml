@@ -22,6 +22,10 @@
         </dependency>
         <dependency>
             <groupId>com.abin.mallchat</groupId>
+            <artifactId>mallchat-multilevel-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.abin.mallchat</groupId>
             <artifactId>mallchat-oss-starter</artifactId>
         </dependency>
         <dependency>
