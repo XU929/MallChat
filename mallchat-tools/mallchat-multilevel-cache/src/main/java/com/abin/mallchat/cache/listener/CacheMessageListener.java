@@ -31,5 +31,4 @@ public class CacheMessageListener implements MessageListener {
                 cacheMessage.getCacheName(), cacheMessage.getKey());
         redisCaffeineCacheManager.clearLocal(cacheMessage.getCacheName(), cacheMessage.getKey());
     }
-
 }

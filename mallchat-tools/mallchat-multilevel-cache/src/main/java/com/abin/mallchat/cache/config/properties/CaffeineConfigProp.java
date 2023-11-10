@@ -48,5 +48,4 @@ public class CaffeineConfigProp {
      * value 强度
      */
     private CaffeineStrength valueStrength;
-
 }

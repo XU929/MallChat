@@ -70,11 +70,13 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
+        // 取值(L1 L2 中取)
         Object value = lookup(key);
         if (value != null) {
             return (T) value;
         }
 
+        // 第一次取值为空(加锁)
         ReentrantLock lock = keyLockMap.computeIfAbsent(key.toString(), s -> {
             log.trace("create lock for key : {}", s);
             return new ReentrantLock();
@@ -82,13 +84,14 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
 
         lock.lock();
         try {
+            // 取值
             value = lookup(key);
             if (value != null) {
                 return (T) value;
             }
-            // 执行函数式接口(意思可以为提供默认值)
+            // 执行函数式接口(数据库中查询)
             value = valueLoader.call();
-            // 校验可否为空值
+            // 判断能否存储空值
             Object storeValue = toStoreValue(value);
             // 更新L1 和 L2缓存
             put(key, storeValue);
@@ -109,14 +112,6 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
         doPut(key, value);
     }
 
-    public void put(Object key, Object value, Duration expire) {
-        if (!super.isAllowNullValues() && value == null) {
-            this.evict(key);
-            return;
-        }
-        doPut(key, value);
-    }
-
     @Override
     public ValueWrapper putIfAbsent(Object key, Object value) {
         Object prevValue;
@@ -128,22 +123,6 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
             }
         }
         return toValueWrapper(prevValue);
-    }
-
-    private void doPut(Object key, Object value) {
-        doPut(key, value, Duration.ZERO);
-    }
-
-    private void doPut(Object key, Object value, Duration expire) {
-        value = toStoreValue(value);
-        if (!expire.isNegative() && !expire.isZero()) {
-            expire = getExpire(value);
-        }
-        setRedisValue(key, value, expire);
-
-        push(new CacheMessage(this.name, key));
-
-        caffeineCache.put(key, value);
     }
 
     @Override
@@ -170,6 +149,22 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
         caffeineCache.invalidateAll();
     }
 
+    /**
+     * @param key
+     * @description 清理本地缓存
+     * @author fuwei.deng
+     * @date 2018年1月31日 下午3:15:39
+     * @version 1.0.0
+     */
+    public void clearLocal(Object key) {
+        log.debug("clear local cache, the key is : {}", key);
+        if (key == null) {
+            caffeineCache.invalidateAll();
+        } else {
+            caffeineCache.invalidate(key);
+        }
+    }
+
     @Override
     protected Object lookup(Object key) {
         Object value = caffeineCache.getIfPresent(key);
@@ -187,10 +182,15 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
         return value;
     }
 
-/*    private Object getKey(Object key) {
-        return this.name.concat(":").concat(
-                StringUtils.isEmpty(cachePrefix) ? key.toString() : cachePrefix.concat(":").concat(key.toString()));
-    }*/
+    private void doPut(Object key, Object value) {
+        value = toStoreValue(value);
+        Duration expire = getExpire(value);
+        setRedisValue(key, value, expire);
+
+        push(new CacheMessage(this.name, key));
+
+        caffeineCache.put(key, value);
+    }
 
     /**
      * 根据key获取过期事件
@@ -232,22 +232,6 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
         // redisTemplate.convertAndSend(topic, message);
     }
 
-    /**
-     * @param key
-     * @description 清理本地缓存
-     * @author fuwei.deng
-     * @date 2018年1月31日 下午3:15:39
-     * @version 1.0.0
-     */
-    public void clearLocal(Object key) {
-        log.debug("clear local cache, the key is : {}", key);
-        if (key == null) {
-            caffeineCache.invalidateAll();
-        } else {
-            caffeineCache.invalidate(key);
-        }
-    }
-
     private void setRedisValue(Object key, Object value, Duration expire) {
 
         Object convertValue = value;
@@ -263,7 +247,6 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
     }
 
     private Object getRedisValue(Object key) {
-
         // NullValue在不同序列化方式中存在问题，因此自定义了RedisNullValue做个转化。
         Object value = redisTemplate.opsForValue().get(key);
         if (value != null && value instanceof RedisNullValue) {
@@ -271,5 +254,4 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
         }
         return value;
     }
-
 }

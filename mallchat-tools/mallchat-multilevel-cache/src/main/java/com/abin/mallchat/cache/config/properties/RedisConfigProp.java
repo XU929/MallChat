@@ -34,5 +34,4 @@ public class RedisConfigProp {
      * 缓存更新时通知其他节点的topic名称
      */
     private String topic = "cache:redis:caffeine:topic";
-
 }

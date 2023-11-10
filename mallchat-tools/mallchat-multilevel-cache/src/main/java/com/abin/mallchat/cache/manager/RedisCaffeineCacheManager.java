@@ -116,5 +116,4 @@ public class RedisCaffeineCacheManager implements CacheManager {
         RedisCaffeineCache redisCaffeineCache = (RedisCaffeineCache) cache;
         redisCaffeineCache.clearLocal(key);
     }
-
 }
