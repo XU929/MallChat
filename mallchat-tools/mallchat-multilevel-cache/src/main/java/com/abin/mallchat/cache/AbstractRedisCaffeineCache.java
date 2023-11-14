@@ -9,7 +9,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Iterables;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.util.CollectionUtils;
 
@@ -21,10 +20,7 @@ import java.util.stream.Collectors;
 /**
  * @author lee
  */
-public abstract class AbstractRedisCaffeineCache<IN extends Number & CharSequence, OUT> extends AbstractSycCache<IN, OUT> implements BatchCache<IN, OUT> {
-
-    @Value("${mallchat.cache.topic}")
-    private String topic;
+public abstract class AbstractRedisCaffeineCache<IN, OUT> extends AbstractSycCache<IN, OUT> implements BatchCache<IN, OUT> {
 
     private Class<OUT> outClass;
     private Class<IN> inClass;
@@ -75,11 +71,7 @@ public abstract class AbstractRedisCaffeineCache<IN extends Number & CharSequenc
         cache.invalidate(req);
     }
 
-    protected abstract String getKey(IN req);
-
     protected abstract Map<IN, OUT> load(List<IN> req);
-
-    protected abstract Long getExpireSeconds();
 
     private void init(long refreshSeconds, long expireSeconds, int maxSize) {
         ParameterizedType genericSuperclass = (ParameterizedType) this.getClass().getGenericSuperclass();
