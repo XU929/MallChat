@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * @author lee
@@ -15,5 +16,5 @@ public class CacheMessage implements Serializable {
 
     private String cacheName;
 
-    private Object key;
+    private Collection<?> keys;
 }

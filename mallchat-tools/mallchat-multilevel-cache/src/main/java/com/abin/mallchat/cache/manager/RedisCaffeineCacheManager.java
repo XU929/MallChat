@@ -1,19 +1,16 @@
 package com.abin.mallchat.cache.manager;
 
+import com.abin.mallchat.cache.AbstractSycCache;
 import com.abin.mallchat.cache.config.properties.CacheConfigProperties;
-import com.abin.mallchat.cache.domain.RedisCaffeineCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
 
 /**
  * @author fuwei.deng
@@ -22,7 +19,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class RedisCaffeineCacheManager implements CacheManager {
 
-    private ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>();
+    private ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap();
 
     private CacheConfigProperties cacheConfigProperties;
 
@@ -51,50 +48,10 @@ public class RedisCaffeineCacheManager implements CacheManager {
             return cache;
         }
 
-        cache = new RedisCaffeineCache(name, redisTemplate, caffeineCache(), cacheConfigProperties);
+        cache = null;
         Cache oldCache = cacheMap.putIfAbsent(name, cache);
         log.debug("create cache instance, the cache name is : {}", name);
         return oldCache == null ? cache : oldCache;
-    }
-
-    public com.github.benmanes.caffeine.cache.Cache<Object, Object> caffeineCache() {
-        Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
-        doIfPresent(cacheConfigProperties.getCaffeine().getExpireAfterAccess(), cacheBuilder::expireAfterAccess);
-        doIfPresent(cacheConfigProperties.getCaffeine().getExpireAfterWrite(), cacheBuilder::expireAfterWrite);
-        doIfPresent(cacheConfigProperties.getCaffeine().getRefreshAfterWrite(), cacheBuilder::refreshAfterWrite);
-        if (cacheConfigProperties.getCaffeine().getInitialCapacity() > 0) {
-            cacheBuilder.initialCapacity(cacheConfigProperties.getCaffeine().getInitialCapacity());
-        }
-        if (cacheConfigProperties.getCaffeine().getMaximumSize() > 0) {
-            cacheBuilder.maximumSize(cacheConfigProperties.getCaffeine().getMaximumSize());
-        }
-        if (cacheConfigProperties.getCaffeine().getKeyStrength() != null) {
-            switch (cacheConfigProperties.getCaffeine().getKeyStrength()) {
-                case WEAK:
-                    cacheBuilder.weakKeys();
-                    break;
-                case SOFT:
-                    throw new UnsupportedOperationException("caffeine 不支持 key 软引用");
-                default:
-            }
-        }
-        if (cacheConfigProperties.getCaffeine().getValueStrength() != null) {
-            switch (cacheConfigProperties.getCaffeine().getValueStrength()) {
-                case WEAK:
-                    cacheBuilder.weakValues();
-                    break;
-                case SOFT:
-                    cacheBuilder.softValues();
-                default:
-            }
-        }
-        return cacheBuilder.build();
-    }
-
-    protected static void doIfPresent(Duration duration, Consumer<Duration> consumer) {
-        if (duration != null && !duration.isNegative()) {
-            consumer.accept(duration);
-        }
     }
 
     @Override
@@ -106,14 +63,16 @@ public class RedisCaffeineCacheManager implements CacheManager {
      * 不发布事件
      *
      * @param cacheName
-     * @param key
+     * @param keys
      */
-    public void clearLocal(String cacheName, Object key) {
+    public void clearLocal(String cacheName, Collection<?> keys) {
         Cache cache = cacheMap.get(cacheName);
         if (cache == null) {
             return;
         }
-        RedisCaffeineCache redisCaffeineCache = (RedisCaffeineCache) cache;
-        redisCaffeineCache.clearLocal(key);
+        if (cache instanceof AbstractSycCache) {
+            AbstractSycCache sycCache = (AbstractSycCache) cache;
+            sycCache.clearLocal(keys);
+        }
     }
 }

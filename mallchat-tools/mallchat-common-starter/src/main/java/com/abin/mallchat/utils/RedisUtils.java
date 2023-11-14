@@ -7,6 +7,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -23,6 +24,10 @@ public class RedisUtils {
 
     static {
         RedisUtils.stringRedisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
+    }
+
+    public static RedisTemplate getTemplate() {
+        return stringRedisTemplate;
     }
 
     private static final String LUA_INCR_EXPIRE =
@@ -214,7 +219,7 @@ public class RedisUtils {
         }
     }
 
-    public static void del(List<String> keys) {
+    public static void del(Collection<String> keys) {
         stringRedisTemplate.delete(keys);
     }
 

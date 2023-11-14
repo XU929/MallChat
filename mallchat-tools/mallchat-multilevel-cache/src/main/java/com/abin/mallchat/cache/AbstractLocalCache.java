@@ -26,7 +26,7 @@ public abstract class AbstractLocalCache<IN, OUT> implements BatchCache<IN, OUT>
     private LoadingCache<IN, OUT> cache;
 
     protected AbstractLocalCache() {
-        init(60, 10 * 60, 1024);
+        this(60, 10 * 60, 1024);
     }
 
     protected AbstractLocalCache(long refreshSeconds, long expireSeconds, int maxSize) {
