@@ -1,5 +1,6 @@
 package com.abin.mallchat.cache.decorator;
 
+import cn.hutool.core.lang.UUID;
 import com.abin.mallchat.cache.AbstractRedisCaffeineCache;
 import com.abin.mallchat.cache.AbstractSycCache;
 import com.abin.mallchat.cache.BatchCache;
@@ -27,6 +28,10 @@ public class SpringCacheDecorator extends AbstractValueAdaptingCache {
     private final BatchCache cache;
 
     private final Map<String, ReentrantLock> keyLockMap = new ConcurrentHashMap<>();
+
+    protected SpringCacheDecorator() {
+        this(true, UUID.randomUUID().toString());
+    }
 
     protected SpringCacheDecorator(boolean allowNullValues, String name) {
         super(allowNullValues);
