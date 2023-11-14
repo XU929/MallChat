@@ -28,6 +28,7 @@ public class SpringCacheDecorator extends AbstractValueAdaptingCache {
     protected SpringCacheDecorator(boolean allowNullValues, String name) {
         super(allowNullValues);
         this.name = name;
+        // todo lee -> 使用 Simple (简单类)
         cache = new AbstractRedisCaffeineCache() {
             @Override
             protected String getKey(Number req) {

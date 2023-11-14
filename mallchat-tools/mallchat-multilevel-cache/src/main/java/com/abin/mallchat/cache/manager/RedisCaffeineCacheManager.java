@@ -47,7 +47,8 @@ public class RedisCaffeineCacheManager implements CacheManager {
         if (!dynamic && !cacheNames.contains(name)) {
             return cache;
         }
-
+        // todo lee -> name 格式 { 缓存级别:缓存名, 例如: L1:cacheName }
+        // 提供 Simple 类
         cache = null;
         Cache oldCache = cacheMap.putIfAbsent(name, cache);
         log.debug("create cache instance, the cache name is : {}", name);
