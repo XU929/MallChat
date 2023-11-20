@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author lengleng
- * @date 2020/9/26
+ * @author lee
  * <p>
  * redis 相关配置
  */

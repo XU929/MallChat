@@ -13,8 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * @author fuwei.deng
- * @version 1.0.0
+ * @author lee
  */
 @Slf4j
 public class RedisCaffeineCacheManager implements CacheManager {

@@ -6,8 +6,7 @@ import lombok.Data;
 import java.time.Duration;
 
 /**
- * @author lengleng
- * @date 2020/9/26
+ * @author lee
  * <p>
  * Caffeine 相关配置
  */

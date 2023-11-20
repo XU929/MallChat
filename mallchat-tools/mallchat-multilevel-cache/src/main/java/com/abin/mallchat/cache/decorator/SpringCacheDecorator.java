@@ -64,7 +64,7 @@ public class SpringCacheDecorator extends AbstractValueAdaptingCache {
 
     @Override
     public Object getNativeCache() {
-        return null;
+        return this;
     }
 
     @Override
@@ -100,8 +100,8 @@ public class SpringCacheDecorator extends AbstractValueAdaptingCache {
 
     @Override
     public void put(Object key, Object value) {
-        if (cache instanceof AbstractSycCache){
-            ((AbstractSycCache)cache).put(key, value);
+        if (cache instanceof AbstractSycCache) {
+            ((AbstractSycCache) cache).put(key, value);
         }
     }
 

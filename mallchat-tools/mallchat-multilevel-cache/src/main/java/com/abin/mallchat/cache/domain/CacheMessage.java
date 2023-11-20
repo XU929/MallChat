@@ -8,7 +8,6 @@ import java.util.Collection;
 
 /**
  * @author lee
- * @version 1.0.0
  */
 @Data
 @AllArgsConstructor

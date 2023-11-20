@@ -8,8 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author fuwei.deng
- * @version 1.0.0
+ * @author lee
  * <p>
  * 全局配置
  */

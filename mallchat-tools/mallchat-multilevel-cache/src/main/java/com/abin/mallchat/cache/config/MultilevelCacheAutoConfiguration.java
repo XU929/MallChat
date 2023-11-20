@@ -16,7 +16,6 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
 /**
  * @author lee
- * @version 1.0.0
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
